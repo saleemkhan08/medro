@@ -3,14 +3,15 @@ import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Icon } from "native-base";
 export class ProductListHeader extends Component {
   render() {
-    const { title, logout, openMenu } = this.props;
+    const { title, openMenu, onActionClicked, action } = this.props;
     return (
       <View
         style={{
           flex: 1,
           flexDirection: "row",
           justifyContent: "space-between",
-          alignItems: "center"
+          alignItems: "center",
+          backgroundColor: "#fff"
         }}
       >
         <TouchableOpacity onPress={openMenu}>
@@ -30,10 +31,10 @@ export class ProductListHeader extends Component {
         >
           {title}
         </Text>
-        <TouchableOpacity onPress={logout}>
+        <TouchableOpacity onPress={onActionClicked}>
           <Icon
             type="MaterialCommunityIcons"
-            name="logout"
+            name={action}
             style={styles.headerBtn}
           />
         </TouchableOpacity>

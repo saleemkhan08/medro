@@ -1,6 +1,7 @@
 import { createStore, applyMiddleware, combineReducers } from "redux";
 import thunk from "redux-thunk";
 import CategoryReducer from "./components/Categories/CategoryReducer";
+import ProductReducer from "./components/Products/ProductReducer";
 import * as firebase from "firebase";
 const firebaseConfig = {
   apiKey: "AIzaSyAAzstWb_q00rzlKRlls3ZcaAAdCm7NMNo",
@@ -13,7 +14,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 export const store = createStore(
-  combineReducers({ CategoryReducer }),
+  combineReducers({ CategoryReducer, ProductReducer }),
   applyMiddleware(thunk)
 );
 export const database = firebase.database();

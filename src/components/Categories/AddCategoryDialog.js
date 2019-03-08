@@ -12,7 +12,6 @@ export class AddCategoryDialog extends Component {
     this.props.dispatch(addCategory(this.state.category));
     this.props.onClose();
   };
-  componentDidMount() {}
   render() {
     return (
       <Dialog.Container visible={this.state.open && this.props.open}>

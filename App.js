@@ -9,10 +9,12 @@ import CategoryDrawer from "./src/components/Categories/CategoryDrawer";
 import {
   createSwitchNavigator,
   createAppContainer,
-  createDrawerNavigator
+  createDrawerNavigator,
+  createStackNavigator
 } from "react-navigation";
 import { store } from "./src/store";
 import { Provider } from "react-redux";
+import ProductEditScreen from "./src/screens/ProductEditScreen";
 /*
 1. Website will only have products for display
 2. Website will have chat option to enquire about the bulk orders
@@ -21,9 +23,36 @@ import { Provider } from "react-redux";
    it will be added based on the performance of the website.
 */
 
+/*
+
+Switch navigator ->
+  LoadingScreen
+  Login
+  Drawer Navigator ->
+    Stack navigator -> 
+      Product List Screen -> 
+        Header ->
+            Add product
+      Product Edit Screen
+          if there is no product ID:
+            Add new product
+          else 
+            Update product
+    Drawer ->
+        categories ->
+          Change the product list based on the category selected
+          On Edit launch Product edit screen by sending the action back to Product List Screen
+
+*/
+
+const StackNavigator = createStackNavigator({
+  ProductListScreen,
+  ProductEditScreen
+});
+
 const DrawerNavigator = createDrawerNavigator(
   {
-    ProductListScreen
+    StackNavigator
   },
   {
     contentComponent: CategoryDrawer

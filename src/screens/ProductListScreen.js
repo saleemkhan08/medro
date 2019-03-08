@@ -1,41 +1,57 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar } from "react-native";
-import { Text, Content, Header, Container } from "native-base";
+import { Content, Container, Drawer, Text } from "native-base";
 import * as firebase from "firebase";
-import ProductListHeader from "../components/ProductListHeader";
+import ProductListHeader from "../components/Products/ProductListHeader";
+import ProductList from "../components/Products/ProductList";
+import { setCurrentProductToEdit } from "../components/Products/ProductActions";
 import { connect } from "react-redux";
+const ADD_PRODUCT = "plus";
+
 export class ProductListScreen extends Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: (
+        <ProductListHeader
+          action={ADD_PRODUCT}
+          onActionClicked={navigation.getParam("onActionClicked")}
+          title={"Medro"}
+          openMenu={navigation.getParam("onMenuClicked")}
+        />
+      ),
+      drawerLockMode: "locked-closed"
+    };
+  };
+
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
       if (user == null) {
         this.props.navigation.navigate("LoginScreen");
       }
     });
+    this.props.navigation.setParams({ onActionClicked: this.onProductAdd });
+    this.props.navigation.setParams({ onMenuClicked: this.openDrawer });
   }
 
+  onProductAdd = () => {
+    this.props.dispatch(setCurrentProductToEdit(undefined));
+    this.props.navigation.navigate("ProductEditScreen");
+  };
+
+  onProductEdit = product => {
+    this.props.dispatch(setCurrentProductToEdit(product));
+    this.props.navigation.navigate("ProductEditScreen");
+  };
+
+  openDrawer = () => {
+    this.props.navigation.openDrawer();
+  };
+
   render() {
-    const { category } = this.props.reducer.currentCategory;
     return (
-      <Container>
-        <Header
-          style={{
-            marginTop: StatusBar.currentHeight,
-            backgroundColor: "#fff"
-          }}
-        >
-          <ProductListHeader
-            title={"Medro"}
-            openMenu={() => {
-              this.props.navigation.openDrawer();
-            }}
-            logout={() => {
-              firebase.auth().signOut();
-              this.props.navigation.navigate("LoginScreen");
-            }}
-          />
-        </Header>
-        <Content>
-          <Text> {category} </Text>
+      <Container> 
+        <Content style={{ backgroundColor: "#eee" }}>
+          <ProductList onProductEdit={this.onProductEdit} />
         </Content>
       </Container>
     );
@@ -51,9 +67,5 @@ const styles = StyleSheet.create({
     marginTop: StatusBar.currentHeight
   }
 });
-const mapStateToProps = state => {
-  return {
-    reducer: state.CategoryReducer
-  };
-};
-export default connect(mapStateToProps)(ProductListScreen);
+
+export default connect()(ProductListScreen);

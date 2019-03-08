@@ -5,13 +5,13 @@ import * as firebase from "firebase";
 export class LoadingScreen extends Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
-      let screen = "DrawerNavigator";
+      let screen = "StackNavigator";
       if (user == null) {
         screen = "LoginScreen";
       }
       setTimeout(() => {
         this.props.navigation.navigate(screen);
-      }, 1000);
+      }, 900);
     });
   }
   render() {

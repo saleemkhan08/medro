@@ -14,19 +14,28 @@ import {
   CATEGORIES
 } from "./Constants";
 
-export const setCurrentCategory = category => ({
-  type: SET_CURRENT_CATEGORY,
-  payload: category
-});
+import { fetchProducts } from "../Products/ProductActions";
+
+export function setCurrentCategory(category) {
+  return dispatch => {
+    dispatch({
+      type: SET_CURRENT_CATEGORY,
+      payload: category
+    });
+    console.log("setCurrentCategory:", category);
+    dispatch(fetchProducts(category.id));
+  };
+}
 
 export function addCategory(name) {
-  console.log("###################### actions addCategory : ", name);
   return dispatch => {
     dispatch(addCategoryBegin());
-    database
+    const newRef = database
       .ref()
       .child(CATEGORIES)
-      .push(name)
+      .push();
+    newRef
+      .set({ name: name, id: newRef.key })
       .then(() => {
         dispatch(addCategorySuccess());
       })
@@ -68,10 +77,10 @@ export function fetchCategories() {
       const categories = querySnapshot.val();
       if (categories) {
         const categoryList = [];
-        const uids = Object.keys(categories);
-        uids.forEach(key => {
-          const category = categories[key];
-          categoryList.push({ category, key });
+        const categoryIds = Object.keys(categories);
+        categoryIds.forEach(id => {
+          const category = categories[id];
+          categoryList.push(category);
         });
         dispatch(fetchCategoriesSuccess(categoryList));
         dispatch(setCurrentCategory(categoryList[0]));
@@ -82,13 +91,13 @@ export function fetchCategories() {
   };
 }
 
-export function removeCategory(key) {
+export function removeCategory(categoryId) {
   return dispatch => {
     dispatch(removeCategoryBegin());
     const query = database
       .ref()
       .child(CATEGORIES)
-      .child(key);
+      .child(categoryId);
     query
       .remove()
       .then(() => {

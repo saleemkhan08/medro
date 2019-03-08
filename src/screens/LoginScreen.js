@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, Image, StatusBar } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  KeyboardAvoidingView,
+  Image,
+  View
+} from "react-native";
 import {
   Container,
   Input,
@@ -69,7 +75,7 @@ export class LoginScreen extends Component {
 
   render() {
     return (
-      <Container style={styles.container}>
+      <KeyboardAvoidingView style={styles.container}>
         <Image
           source={require("../../assets/icon.png")}
           style={styles.drawerImage}
@@ -112,7 +118,7 @@ export class LoginScreen extends Component {
             <Text style={styles.forgotPwd}>Forgot Password?</Text>
           </Button>
         </View>
-      </Container>
+      </KeyboardAvoidingView>
     );
   }
 }

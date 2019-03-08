@@ -7,7 +7,8 @@ import {
   Left,
   Right,
   Icon,
-  Button
+  Button,
+  Body
 } from "native-base";
 
 import {
@@ -24,20 +25,27 @@ import {
   setCurrentCategory
 } from "./CategoryActions";
 import AddCategoryDialog from "./AddCategoryDialog";
-
+import * as firebase from "firebase";
 export class CategoryDrawer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      open: false
+      open: false,
+      user: {}
     };
   }
   componentDidMount() {
     this.props.dispatch(fetchCategories());
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        user.email;
+        this.setState({
+          user
+        });
+      }
+    });
   }
-
   render() {
-    //const categories = ["Wallets", "Belts", "Shoes", "Jackets"];
     const { categories, currentCategory } = this.props.reducer;
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -47,6 +55,7 @@ export class CategoryDrawer extends Component {
             style={styles.drawerImage}
           />
           <Text style={styles.title}>MEDRO</Text>
+          <Text style={{ textAlign: "center" }}> {this.state.user.email} </Text>
         </View>
         <AddCategoryDialog
           open={this.state.open}
@@ -58,26 +67,32 @@ export class CategoryDrawer extends Component {
         />
         <ScrollView style={{ flex: 1 }}>
           <List>
-            {categories.map(({ category, key }) => {
+            <ListItem itemDivider first>
+              <Text>Categories</Text>
+            </ListItem>
+
+            {categories.map(category => {
               return (
                 <ListItem
-                  key={key}
-                  selected={currentCategory.category == category}
+                  key={category.id}
+                  selected={currentCategory.id == category.id}
                   onPress={() => {
-                    this.props.dispatch(setCurrentCategory({ category, key }));
+                    this.props.dispatch(setCurrentCategory(category));
                     this.props.navigation.closeDrawer();
                   }}
                 >
                   <Left>
-                    <Text>{category}</Text>
+                    <Text>{category.name}</Text>
                   </Left>
                   <Right>
                     <TouchableOpacity
-                      onPress={() => this.props.dispatch(removeCategory(key))}
+                      onPress={() =>
+                        this.props.dispatch(removeCategory(category.id))
+                      }
                     >
                       <Icon
-                        type="FontAwesome"
-                        name="remove"
+                        type="EvilIcons"
+                        name="close"
                         style={{ color: "#bb0a1e" }}
                       />
                     </TouchableOpacity>
@@ -89,7 +104,7 @@ export class CategoryDrawer extends Component {
               full
               bordered
               rounded
-              style={{ margin: 10, marginTop: 20 }}
+              style={{ margin: 10 }}
               onPress={() => {
                 this.setState({
                   open: true
@@ -98,6 +113,33 @@ export class CategoryDrawer extends Component {
             >
               <Text>ADD</Text>
             </Button>
+            <ListItem itemDivider>
+              <Text>Account</Text>
+            </ListItem>
+            <ListItem icon>
+              <Left>
+                <Icon type="FontAwesome" name="user" />
+              </Left>
+              <Body>
+                <Text>Profile</Text>
+              </Body>
+              <Right />
+            </ListItem>
+            <ListItem
+              icon
+              onPress={() => {
+                firebase.auth().signOut();
+                this.props.navigation.navigate("LoginScreen");
+              }}
+            >
+              <Left>
+                <Icon type="MaterialCommunityIcons" name="logout" />
+              </Left>
+              <Body>
+                <Text>Logout</Text>
+              </Body>
+              <Right />
+            </ListItem>
           </List>
         </ScrollView>
       </SafeAreaView>
