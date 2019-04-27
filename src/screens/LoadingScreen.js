@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { StyleSheet, Image } from "react-native";
 import { Text, View } from "native-base";
-import * as firebase from "firebase";
+import { firebaseAuth } from "../store";
 export class LoadingScreen extends Component {
   componentDidMount() {
-    firebase.auth().onAuthStateChanged(user => {
+    firebaseAuth.onAuthStateChanged(user => {
       let screen = "StackNavigator";
       if (user == null) {
         screen = "LoginScreen";

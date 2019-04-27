@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import {
   Container,
-  Content,
   Form,
   Item,
   Label,
@@ -10,10 +9,13 @@ import {
   Text,
   View
 } from "native-base";
+import { KeyboardAvoidingView, ScrollView } from "react-native";
 import { connect } from "react-redux";
+import { Header } from "react-navigation";
 import {
   updateProduct,
-  addProduct
+  addProduct,
+  setCurrentProductToEdit
 } from "../components/Products/ProductActions";
 class ProductEditScreen extends Component {
   state = {
@@ -26,20 +28,18 @@ class ProductEditScreen extends Component {
     amazon: ""
   };
 
-  static navigationOptions = ({ navigation }) => {
+  static navigationOptions = () => {
     return {
-      title: navigation.getParam("title")
+      title: "Product Editor"
     };
   };
 
   componentDidMount() {
-    const { currentProductToEdit } = this.props.productReducer;
-    const title = currentProductToEdit ? "Edit Product" : "Add Product";
+    const { currentProduct } = this.props.productReducer;
     const { currentCategory } = this.props.categoryReducer;
-    this.props.navigation.setParams({ title: title });
-    if (currentProductToEdit) {
+    if (currentProduct) {
       this.setState({
-        ...currentProductToEdit
+        ...currentProduct
       });
     } else {
       this.setState({
@@ -48,9 +48,13 @@ class ProductEditScreen extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.props.dispatch(setCurrentProductToEdit(undefined));
+  }
+
   saveProduct = () => {
-    const { currentProductToEdit } = this.props.productReducer;
-    if (currentProductToEdit) {
+    const { currentProduct } = this.props.productReducer;
+    if (currentProduct) {
       this.props.dispatch(updateProduct(this.state));
     } else {
       this.props.dispatch(addProduct(this.state));
@@ -59,85 +63,100 @@ class ProductEditScreen extends Component {
   };
 
   render() {
+    const { currentProduct } = this.props.productReducer;
+    const floatingLabel = currentProduct ? true : false;
     return (
       <Container>
-        <Content>
-          <Form>
-            <Item floatingLabel>
-              <Label>Product Name</Label>
-              <Input
-                onChangeText={text => this.setState({ name: text })}
-                value={this.state.name}
-              />
-            </Item>
-            <Item floatingLabel>
-              <Label>Description</Label>
-              <Input
-                onChangeText={text => this.setState({ description: text })}
-                value={this.state.description}
-              />
-            </Item>
-            <Item floatingLabel>
-              <Label>Price</Label>
-              <Input
-                onChangeText={text => this.setState({ price: text })}
-                value={this.state.price}
-              />
-            </Item>
-            <Item floatingLabel>
-              <Label>Flipkart Link</Label>
-              <Input
-                onChangeText={text => this.setState({ flipkart: text })}
-                value={this.state.flipkart}
-              />
-            </Item>
-            <Item floatingLabel>
-              <Label>Amazon Link</Label>
-              <Input
-                onChangeText={text => this.setState({ amazon: text })}
-                value={this.state.amazon}
-              />
-            </Item>
-          </Form>
-          <View
-            style={{
-              flex: 2,
-              flexDirection: "row",
-              margin: 10,
-              justifyContent: "space-between"
-            }}
-          >
-            <Button
-              style={{
-                margin: 10,
-                flex: 1,
-                color: "#999",
-                borderColor: "#999"
-              }}
-              rounded
-              light
-              bordered
-              onPress={() => {
-                this.props.navigation.goBack();
-              }}
-            >
-              <Text
-                style={{ width: "100%", textAlign: "center", color: "#999" }}
+        <KeyboardAvoidingView
+          keyboardVerticalOffset={Header.HEIGHT + 20} // adjust the value here if you need more padding
+          style={{ flex: 1, alignContent: "center", justifyContent: "center" }}
+          behavior="padding"
+        >
+          <ScrollView>
+            <Form style={{ padding: 10 }}>
+              <Item style={{ marginTop: 5, marginEnd: 15 }}>
+                <Input
+                  placeholder="Product Name"
+                  onChangeText={text => this.setState({ name: text })}
+                  value={this.state.name}
+                />
+              </Item>
+              <Item style={{ marginTop: 5, marginEnd: 15 }}>
+                <Input
+                  placeholder="Description"
+                  onChangeText={text => this.setState({ description: text })}
+                  value={this.state.description}
+                />
+              </Item>
+              <Item style={{ marginTop: 5, marginEnd: 15 }}>
+                <Input
+                  placeholder="Price"
+                  onChangeText={text => this.setState({ price: text })}
+                  value={this.state.price}
+                />
+              </Item>
+              <Item style={{ marginTop: 5, marginEnd: 15 }}>
+                <Input
+                  placeholder="Flipkart Link"
+                  onChangeText={text => this.setState({ flipkart: text })}
+                  value={this.state.flipkart}
+                />
+              </Item>
+              <Item
+                style={{
+                  marginTop: 5,
+                  marginBottom: 0,
+                  marginEnd: 15
+                }}
               >
-                Cancel
-              </Text>
-            </Button>
-            <Button
-              style={{ margin: 10, flex: 1 }}
-              success
-              rounded
-              bordered
-              onPress={this.saveProduct}
+                <Input
+                  placeholder="Amazon Link"
+                  onChangeText={text => this.setState({ amazon: text })}
+                  value={this.state.amazon}
+                />
+              </Item>
+            </Form>
+            <View
+              style={{
+                flex: 2,
+                flexDirection: "row",
+                margin: 10,
+                marginTop: 0,
+                justifyContent: "space-between"
+              }}
             >
-              <Text style={{ width: "100%", textAlign: "center" }}>Save</Text>
-            </Button>
-          </View>
-        </Content>
+              <Button
+                style={{
+                  margin: 10,
+                  flex: 1,
+                  color: "#999",
+                  borderColor: "#999"
+                }}
+                rounded
+                light
+                bordered
+                onPress={() => {
+                  this.props.navigation.goBack();
+                }}
+              >
+                <Text
+                  style={{ width: "100%", textAlign: "center", color: "#999" }}
+                >
+                  Cancel
+                </Text>
+              </Button>
+              <Button
+                style={{ margin: 10, flex: 1 }}
+                success
+                rounded
+                bordered
+                onPress={this.saveProduct}
+              >
+                <Text style={{ width: "100%", textAlign: "center" }}>Save</Text>
+              </Button>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Container>
     );
   }

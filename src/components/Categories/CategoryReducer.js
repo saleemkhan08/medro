@@ -14,7 +14,8 @@ import {
 const initialState = {
   categories: [],
   currentCategory: {},
-  isLoading: true
+  isLoading: true,
+  deleteProgress: []
 };
 
 const CategoryReducer = (state = initialState, action) => {
@@ -27,11 +28,16 @@ const CategoryReducer = (state = initialState, action) => {
     case ADD_CATEGORY_ERROR:
       return { ...state, isLoading: false };
     case REMOVE_CATEGORY_BEGIN:
-      return { ...state, isLoading: true };
+      const deleteProgressArr = [...state.deleteProgress, payload];
+      return { ...state, deleteProgress: deleteProgressArr };
     case REMOVE_CATEGORY_SUCESS:
-      return { ...state, isLoading: false };
     case REMOVE_CATEGORY_ERROR:
-      return { ...state, isLoading: false };
+      const deleteProgress = [...state.deleteProgress];
+      const index = deleteProgress.indexOf(payload);
+      if (index >= 0) {
+        deleteProgress.splice(index, 1);
+      }
+      return { ...state, deleteProgress };
     case FETCH_CATEGORIES_BEGIN:
       return { ...state, isLoading: true };
     case FETCH_CATEGORIES_SUCCESS:

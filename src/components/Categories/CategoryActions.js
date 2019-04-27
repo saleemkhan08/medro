@@ -93,7 +93,7 @@ export function fetchCategories() {
 
 export function removeCategory(categoryId) {
   return dispatch => {
-    dispatch(removeCategoryBegin());
+    dispatch(removeCategoryBegin(categoryId));
     const query = database
       .ref()
       .child(CATEGORIES)
@@ -101,22 +101,25 @@ export function removeCategory(categoryId) {
     query
       .remove()
       .then(() => {
-        dispatch(removeCategorySuccess());
+        dispatch(removeCategorySuccess(categoryId));
       })
       .catch(() => {
-        dispatch(removeCategoryError());
+        dispatch(removeCategoryError(categoryId));
       });
   };
 }
 
-export const removeCategoryBegin = () => ({
-  type: REMOVE_CATEGORY_BEGIN
+export const removeCategoryBegin = id => ({
+  type: REMOVE_CATEGORY_BEGIN,
+  payload: id
 });
 
-export const removeCategorySuccess = () => ({
-  type: REMOVE_CATEGORY_SUCESS
+export const removeCategorySuccess = id => ({
+  type: REMOVE_CATEGORY_SUCESS,
+  payload: id
 });
 
-export const removeCategoryError = () => ({
-  type: REMOVE_CATEGORY_ERROR
+export const removeCategoryError = id => ({
+  type: REMOVE_CATEGORY_ERROR,
+  payload: id
 });

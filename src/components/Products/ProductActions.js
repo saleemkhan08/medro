@@ -1,4 +1,4 @@
-import { database } from "../../store";
+import { database, storage } from "../../store";
 
 import {
   ADD_PRODUCT_BEGIN,
@@ -13,15 +13,9 @@ import {
   FETCH_PRODUCTS_BEGIN,
   FETCH_PRODUCTS_SUCCESS,
   FETCH_PRODUCTS_ERROR,
-  SET_CURRENT_PRODUCT_TO_VIEW,
   SET_CURRENT_PRODUCT_TO_EDIT,
   PRODUCTS
 } from "./Constants";
-
-export const setCurrentProductToView = product => ({
-  type: SET_CURRENT_PRODUCT_TO_VIEW,
-  payload: product
-});
 
 export const setCurrentProductToEdit = product => ({
   type: SET_CURRENT_PRODUCT_TO_EDIT,
@@ -44,6 +38,39 @@ export function addProduct(product) {
       })
       .catch(() => {
         dispatch(addProductError());
+      });
+  };
+}
+
+export function uploadImage(currentProduct, url, id) {
+  return dispatch => {
+    database
+      .ref()
+      .child(PRODUCTS)
+      .child(currentProduct.categoryId)
+      .child(currentProduct.id)
+      .child("images")
+      .child(id)
+      .set(url);
+  };
+}
+export function deleteImage(currentProduct, imgName) {
+  return dispatch => {
+    database
+      .ref()
+      .child(PRODUCTS)
+      .child(currentProduct.categoryId)
+      .child(currentProduct.id)
+      .child("images")
+      .child(imgName)
+      .remove()
+      .then(() => {
+        storage
+          .ref()
+          .child("images")
+          .child(currentProduct.id)
+          .child(imgName)
+          .delete();
       });
   };
 }
@@ -128,7 +155,7 @@ export function fetchProducts(categoryId) {
 
 export function removeProduct(product) {
   return dispatch => {
-    dispatch(removeProductBegin());
+    dispatch(removeProductBegin(product.id));
     const query = database
       .ref()
       .child(PRODUCTS)
@@ -137,22 +164,25 @@ export function removeProduct(product) {
     query
       .remove()
       .then(() => {
-        dispatch(removeProductSuccess());
+        dispatch(removeProductSuccess(product.id));
       })
       .catch(() => {
-        dispatch(removeProductError());
+        dispatch(removeProductError(product.id));
       });
   };
 }
 
-export const removeProductBegin = () => ({
-  type: REMOVE_PRODUCT_BEGIN
+export const removeProductBegin = id => ({
+  type: REMOVE_PRODUCT_BEGIN,
+  payload: id
 });
 
-export const removeProductSuccess = () => ({
-  type: REMOVE_PRODUCT_SUCESS
+export const removeProductSuccess = id => ({
+  type: REMOVE_PRODUCT_SUCESS,
+  payload: id
 });
 
-export const removeProductError = () => ({
-  type: REMOVE_PRODUCT_ERROR
+export const removeProductError = id => ({
+  type: REMOVE_PRODUCT_ERROR,
+  payload: id
 });

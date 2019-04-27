@@ -19,13 +19,11 @@ import {
   TouchableOpacity
 } from "react-native";
 import { connect } from "react-redux";
-import {
-  fetchCategories,
-  removeCategory,
-  setCurrentCategory
-} from "./CategoryActions";
+import { removeCategory, setCurrentCategory } from "./CategoryActions";
 import AddCategoryDialog from "./AddCategoryDialog";
-import * as firebase from "firebase";
+import { firebaseAuth } from "../../store";
+import { showDeleteConfirmation } from "../DeleteConfirmation";
+import { Disabled } from "../Disabled";
 export class CategoryDrawer extends Component {
   constructor(props) {
     super(props);
@@ -35,8 +33,7 @@ export class CategoryDrawer extends Component {
     };
   }
   componentDidMount() {
-    this.props.dispatch(fetchCategories());
-    firebase.auth().onAuthStateChanged(user => {
+    firebaseAuth.onAuthStateChanged(user => {
       if (user) {
         user.email;
         this.setState({
@@ -45,27 +42,31 @@ export class CategoryDrawer extends Component {
       }
     });
   }
+  isDeleting = categoryId => {
+    return this.props.reducer.deleteProgress.includes(categoryId);
+  };
   render() {
     const { categories, currentCategory } = this.props.reducer;
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.titleContainer}>
-          <Image
-            source={require("../../../assets/icon.png")}
-            style={styles.drawerImage}
-          />
-          <Text style={styles.title}>MEDRO</Text>
-          <Text style={{ textAlign: "center" }}> {this.state.user.email} </Text>
-        </View>
-        <AddCategoryDialog
-          open={this.state.open}
-          onClose={() => {
-            this.setState({
-              open: false
-            });
-          }}
-        />
         <ScrollView style={{ flex: 1 }}>
+          <View style={styles.titleContainer}>
+            <Image
+              source={require("../../../assets/icon.png")}
+              style={styles.drawerImage}
+            />
+            <Text style={styles.title}>MEDRO</Text>
+            <Text style={{ textAlign: "center" }}>{this.state.user.email}</Text>
+          </View>
+          <AddCategoryDialog
+            open={this.state.open}
+            onClose={() => {
+              this.setState({
+                open: false
+              });
+            }}
+          />
+
           <List>
             <ListItem itemDivider first>
               <Text>Categories</Text>
@@ -81,13 +82,16 @@ export class CategoryDrawer extends Component {
                     this.props.navigation.closeDrawer();
                   }}
                 >
+                  <Disabled show={this.isDeleting(category.id)} />
                   <Left>
                     <Text>{category.name}</Text>
                   </Left>
                   <Right>
                     <TouchableOpacity
                       onPress={() =>
-                        this.props.dispatch(removeCategory(category.id))
+                        showDeleteConfirmation(() => {
+                          this.props.dispatch(removeCategory(category.id));
+                        }, category.name)
                       }
                     >
                       <Icon
@@ -116,19 +120,10 @@ export class CategoryDrawer extends Component {
             <ListItem itemDivider>
               <Text>Account</Text>
             </ListItem>
-            <ListItem icon>
-              <Left>
-                <Icon type="FontAwesome" name="user" />
-              </Left>
-              <Body>
-                <Text>Profile</Text>
-              </Body>
-              <Right />
-            </ListItem>
             <ListItem
               icon
               onPress={() => {
-                firebase.auth().signOut();
+                firebaseAuth.signOut();
                 this.props.navigation.navigate("LoginScreen");
               }}
             >
@@ -171,7 +166,8 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
   return {
-    reducer: state.CategoryReducer
+    reducer: state.CategoryReducer,
+    productReducer: state.ProductReducer
   };
 };
 export default connect(mapStateToProps)(CategoryDrawer);

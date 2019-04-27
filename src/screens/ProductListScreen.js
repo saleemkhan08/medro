@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar } from "react-native";
-import { Content, Container, Drawer, Text } from "native-base";
-import * as firebase from "firebase";
+import { Content, Container } from "native-base";
+import { firebaseAuth } from "../store";
 import ProductListHeader from "../components/Products/ProductListHeader";
 import ProductList from "../components/Products/ProductList";
 import { setCurrentProductToEdit } from "../components/Products/ProductActions";
 import { connect } from "react-redux";
+import { Permissions } from "expo";
+import { fetchCategories } from "../components/Categories/CategoryActions";
 const ADD_PRODUCT = "plus";
 
 export class ProductListScreen extends Component {
@@ -23,14 +25,17 @@ export class ProductListScreen extends Component {
     };
   };
 
-  componentDidMount() {
-    firebase.auth().onAuthStateChanged(user => {
+  async componentDidMount() {
+    this.props.dispatch(fetchCategories());
+    firebaseAuth.onAuthStateChanged(user => {
       if (user == null) {
         this.props.navigation.navigate("LoginScreen");
       }
     });
     this.props.navigation.setParams({ onActionClicked: this.onProductAdd });
     this.props.navigation.setParams({ onMenuClicked: this.openDrawer });
+    await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    await Permissions.askAsync(Permissions.CAMERA);
   }
 
   onProductAdd = () => {
@@ -49,9 +54,12 @@ export class ProductListScreen extends Component {
 
   render() {
     return (
-      <Container> 
+      <Container>
         <Content style={{ backgroundColor: "#eee" }}>
-          <ProductList onProductEdit={this.onProductEdit} />
+          <ProductList
+            onProductEdit={this.onProductEdit}
+            navigation={this.props.navigation}
+          />
         </Content>
       </Container>
     );

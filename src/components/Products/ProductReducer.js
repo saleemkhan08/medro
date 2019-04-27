@@ -11,15 +11,14 @@ import {
   FETCH_PRODUCTS_BEGIN,
   FETCH_PRODUCTS_SUCCESS,
   FETCH_PRODUCTS_ERROR,
-  SET_CURRENT_PRODUCT_TO_EDIT,
-  SET_CURRENT_PRODUCT_TO_VIEW
+  SET_CURRENT_PRODUCT_TO_EDIT
 } from "./Constants";
 
 const initialState = {
   products: [],
-  currentProductToEdit: undefined,
-  currentProductToView: undefined,
-  isLoading: true
+  currentProduct: undefined,
+  isLoading: true,
+  deleteProgress: []
 };
 
 const ProductReducer = (state = initialState, action) => {
@@ -38,21 +37,32 @@ const ProductReducer = (state = initialState, action) => {
     case UPDATE_PRODUCT_ERROR:
       return { ...state, isLoading: false };
     case REMOVE_PRODUCT_BEGIN:
-      return { ...state, isLoading: true };
+      const deleteProgressArr = [...state.deleteProgress, payload];
+      return { ...state, deleteProgress: deleteProgressArr };
     case REMOVE_PRODUCT_SUCESS:
-      return { ...state, isLoading: false };
     case REMOVE_PRODUCT_ERROR:
-      return { ...state, isLoading: false };
+      const deleteProgress = [...state.deleteProgress];
+      const index = deleteProgress.indexOf(payload);
+      if (index >= 0) {
+        deleteProgress.splice(index, 1);
+      }
+      return { ...state, deleteProgress };
     case FETCH_PRODUCTS_BEGIN:
       return { ...state, isLoading: true, products: [] };
     case FETCH_PRODUCTS_SUCCESS:
-      return { ...state, isLoading: false, products: payload };
+      let currentProduct = { ...state.currentProduct };
+      if (currentProduct.id) {
+        payload.forEach(product => {
+          if (product.id === currentProduct.id) {
+            currentProduct = { ...product };
+          }
+        });
+      }
+      return { ...state, isLoading: false, products: payload, currentProduct };
     case FETCH_PRODUCTS_ERROR:
       return { ...state, isLoading: false };
     case SET_CURRENT_PRODUCT_TO_EDIT:
-      return { ...state, currentProductToEdit: payload };
-    case SET_CURRENT_PRODUCT_TO_VIEW:
-      return { ...state, currentProductToView: payload };
+      return { ...state, currentProduct: payload };
     default:
       return state;
   }
